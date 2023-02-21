@@ -15,8 +15,14 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { makeStyles } from "@material-ui/core/styles";
 import LibraryMusicRoundedIcon from "@mui/icons-material/LibraryMusicRounded";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
+import firebaseConfig from "../firebaseconfig";
 
 import "./Login.css";
+
+firebase.initializeApp(firebaseConfig);
 
 const useStyles = makeStyles((theme) => ({
   textField: {
@@ -28,11 +34,53 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Login() {
+  var provider = new firebase.auth.GoogleAuthProvider();
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any | null>(null);
+  // const { from } = location.state || { from: { pathname: "/login" } };
   const navigate = useNavigate();
   let resonance = true;
 
   const classes = useStyles();
+
+  function SignInGoogle() {
+    firebase
+      .auth()
+      .signInWithPopup(provider)
+      .then((result: { credential: any; user: any }) => {
+        /** @type {firebase.auth.OAuthCredential} */
+        var credential = result.credential;
+
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...
+
+        var info = {
+          name: user.displayName,
+          mail: user.email,
+        };
+        setUser(info);
+        localStorage.setItem("name", user.displayName ?? "{}");
+        localStorage.setItem("user", "Admin");
+        navigate("/home");
+      })
+      .catch(
+        (error: { code: any; message: any; email: any; credential: any }) => {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          console.log(errorMessage);
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+          // ...
+        }
+      );
+    console.log(user);
+  }
 
   const handleSubmit = async (event: {
     preventDefault: () => void;
@@ -127,6 +175,16 @@ export default function Login() {
               </Link>
             </Grid>
           </Grid>
+          <button onClick={SignInGoogle} className="btn btn-custom">
+            <div className="img-logo">
+              <img
+                style={{ maxWidth: "40px" }}
+                src="https://img.icons8.com/plasticine/100/000000/google-logo.png"
+                alt=""
+              />
+            </div>
+            <b style={{ color: "white" }}>Login With Google</b>
+          </button>
         </Box>
       </Box>
     </Container>
