@@ -5,10 +5,12 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import "bootstrap/dist/css/bootstrap.css";
+import { useKeycloak } from "@react-keycloak/web";
 
 function Navbhar() {
   const navigate = useNavigate();
   let User = localStorage.getItem("name");
+  const { keycloak, initialized } = useKeycloak();
 
   const SignOut = () => {
     localStorage.clear();
@@ -51,9 +53,21 @@ function Navbhar() {
                 <NavDropdown.Item href="#action/3.2">Premium</NavDropdown.Item>
                 <NavDropdown.Item href="#action/3.3">Setting</NavDropdown.Item>
                 <NavDropdown.Divider />
+
+                {User !== null ? (
+                  <NavDropdown.Item href="/" onClick={() => SignOut()}>
+                    Sign Out
+                  </NavDropdown.Item>
+                ) : (
+                  <NavDropdown.Item href="/" onClick={() => keycloak.logout()}>
+                    SignOut KeyCloak
+                  </NavDropdown.Item>
+                )}
+
+                {/*                 
                 <NavDropdown.Item href="/" onClick={() => SignOut()}>
                   Sign Out
-                </NavDropdown.Item>
+                </NavDropdown.Item> */}
               </NavDropdown>
             </Nav.Link>
           </Nav>

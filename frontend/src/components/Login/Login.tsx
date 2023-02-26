@@ -19,6 +19,7 @@ import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 import firebaseConfig from "../firebaseconfig";
+import { useKeycloak } from "@react-keycloak/web";
 
 import "./Login.css";
 
@@ -37,11 +38,31 @@ export default function Login() {
   var provider = new firebase.auth.GoogleAuthProvider();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any | null>(null);
+  const { keycloak, initialized } = useKeycloak();
   // const { from } = location.state || { from: { pathname: "/login" } };
   const navigate = useNavigate();
   let resonance = true;
 
   const classes = useStyles();
+
+  const renderAuthButton = () => {
+    if (!keycloak.authenticated) {
+      return (
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          color="success"
+          onClick={() => keycloak.login()}
+          sx={{ mt: 1, mb: 2 }}
+        >
+          LogIn using Keycloak
+        </Button>
+      );
+    } else {
+      navigate("/home");
+    }
+  };
 
   function SignInGoogle() {
     firebase
@@ -102,7 +123,7 @@ export default function Login() {
   };
   useEffect(() => {
     if (resonance) {
-      alert("ENTER ANY USERNAME TO LOGIN PASSWORD WILL BE Admin");
+      // alert("ENTER ANY USERNAME TO LOGIN PASSWORD WILL BE Admin");
       resonance = !resonance;
     }
   }, []);
@@ -185,6 +206,19 @@ export default function Login() {
             </div>
             <b style={{ color: "white" }}>Login With Google</b>
           </button>
+          {/* {!keycloak.authenticated && (
+                    <button
+                      type="button"
+                      className="text-blue-800"
+                      onClick={() => keycloak.login()}
+                    >
+                      Login using Cloak
+                    </button>
+                  )
+
+                  } */}
+
+          {renderAuthButton()}
         </Box>
       </Box>
     </Container>
